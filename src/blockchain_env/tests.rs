@@ -12,7 +12,7 @@ fn new_transaction() {
             gas_amount,
             max_mev_amount,
         } => {
-            false
+            true
         }
         Transaction::Attack {
             id,
