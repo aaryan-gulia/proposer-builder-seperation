@@ -26,4 +26,13 @@ impl TransactionBuilder {
             transaction_type: None,
         }
     }
+
+    pub fn build(self) -> Result<Transaction, String> {
+        Ok(Transaction {
+            id: self.id.unwrap(),
+            gas_amount: self.gas_amount.unwrap(),
+            max_mev_amount: self.max_mev_amount.unwrap(),
+            transaction_type: self.transaction_type.unwrap(),
+        })
+    }
 }
