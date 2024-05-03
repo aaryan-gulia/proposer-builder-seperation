@@ -26,13 +26,54 @@ impl TransactionBuilder {
             transaction_type: None,
         }
     }
+}
 
+impl TransactionBuilder {
     pub fn build(self) -> Result<Transaction, String> {
+        let gas_amount = self
+            .gas_amount
+            .ok_or(TransactionBuilderError::MissingGasAmount)?;
+        let max_mev_amount = self
+            .max_mev_amount
+            .ok_or(TransactionBuilderError::MissingMaxMevAmount)?;
+        let transaction_type = self
+            .transaction_type
+            .ok_or(TransactionBuilderError::MissingTransactionType)?;
+        let id = self.id.ok_or(TransactionBuilderError::InvalidId)?;
+
         Ok(Transaction {
-            id: self.id.unwrap(),
-            gas_amount: self.gas_amount.unwrap(),
-            max_mev_amount: self.max_mev_amount.unwrap(),
-            transaction_type: self.transaction_type.unwrap(),
+            id,
+            gas_amount,
+            max_mev_amount,
+            transaction_type,
         })
+    }
+}
+
+#[derive(Debug)]
+pub enum TransactionBuilderError {
+    MissingGasAmount,
+    MissingMaxMevAmount,
+    MissingTransactionType,
+    InvalidId,
+}
+
+impl std::fmt::Display for TransactionBuilderError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "TransactionBuilderError: {:?}", self)
+    }
+}
+
+impl std::error::Error for TransactionBuilderError {}
+impl From<TransactionBuilderError> for String {
+    fn from(error: TransactionBuilderError) -> Self {
+        "Transaction error:".to_string() + {
+            match error {
+                TransactionBuilderError::MissingGasAmount => "missing gas amount",
+                TransactionBuilderError::MissingMaxMevAmount => "missing max mev amount",
+                TransactionBuilderError::MissingTransactionType => "missing transaction type",
+                TransactionBuilderError::InvalidId => "invalid id",
+            }
+        }
     }
 }
