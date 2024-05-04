@@ -1,2 +1,2 @@
 # proposer-builder-seperation
-Simulation for Proposer-Builder-Seperation in Rust
+Agent Based Simulation for Proposer-Builder-Seperation in Rust
