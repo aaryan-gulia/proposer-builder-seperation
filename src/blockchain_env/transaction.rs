@@ -4,6 +4,17 @@ pub struct Transaction {
     pub gas_amount: f64,
     pub max_mev_amount: f64,
     pub transaction_type: TransactionType,
+    pub node_signature: Option<String>,
+}
+
+impl Transaction {
+    pub fn get_transaction_id(self) -> Option<u32> {
+        if self.id > 0 {
+            Some(self.id)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -17,6 +28,7 @@ pub struct TransactionBuilder {
     gas_amount: Option<f64>,
     max_mev_amount: Option<f64>,
     transaction_type: Option<TransactionType>,
+    node_signature: Option<String>,
 }
 
 impl TransactionBuilder {
@@ -26,9 +38,13 @@ impl TransactionBuilder {
             gas_amount: None,
             max_mev_amount: None,
             transaction_type: None,
+            node_signature: None,
         }
     }
 }
+
+static mut NORMAL_TRANSACTION_COUNTER: u32 = 0;
+static mut ATTACK_TRANSACTION_COUNTER: u32 = 0;
 
 impl TransactionBuilder {
     pub fn gas_amount(mut self, gas_amount: f64) -> Self {
@@ -46,6 +62,11 @@ impl TransactionBuilder {
         self
     }
 
+    pub fn node_signature(mut self, node_signature: String) -> Self {
+        self.node_signature = Some(node_signature);
+        self
+    }
+
     pub fn build(self) -> Result<Transaction, TransactionBuilderError> {
         let gas_amount = self
             .gas_amount
@@ -56,13 +77,25 @@ impl TransactionBuilder {
         let transaction_type = self
             .transaction_type
             .ok_or(TransactionBuilderError::MissingTransactionType)?;
-        let id = self.id.ok_or(TransactionBuilderError::InvalidId)?;
+        let node_signature = self.node_signature;
+
+        let id = match transaction_type {
+            TransactionType::Normal => unsafe {
+                NORMAL_TRANSACTION_COUNTER += 1;
+                NORMAL_TRANSACTION_COUNTER
+            },
+            TransactionType::Attack => unsafe {
+                ATTACK_TRANSACTION_COUNTER += 1;
+                ATTACK_TRANSACTION_COUNTER
+            },
+        };
 
         Ok(Transaction {
             id,
             gas_amount,
             max_mev_amount,
             transaction_type,
+            node_signature,
         })
     }
 }
