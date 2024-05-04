@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Transaction {
     id: u32,
     pub gas_amount: f64,
@@ -5,6 +6,7 @@ pub struct Transaction {
     pub transaction_type: TransactionType,
 }
 
+#[derive(Debug)]
 pub enum TransactionType {
     Normal,
     Attack,
@@ -29,7 +31,22 @@ impl TransactionBuilder {
 }
 
 impl TransactionBuilder {
-    pub fn build(self) -> Result<Transaction, String> {
+    pub fn gas_amount(mut self, gas_amount: f64) -> Self {
+        self.gas_amount = Some(gas_amount);
+        self
+    }
+
+    pub fn max_mev_amount(mut self, max_mev_amount: f64) -> Self {
+        self.max_mev_amount = Some(max_mev_amount);
+        self
+    }
+
+    pub fn transaction_type(mut self, transaction_type: TransactionType) -> Self {
+        self.transaction_type = Some(transaction_type);
+        self
+    }
+
+    pub fn build(self) -> Result<Transaction, TransactionBuilderError> {
         let gas_amount = self
             .gas_amount
             .ok_or(TransactionBuilderError::MissingGasAmount)?;
