@@ -8,7 +8,7 @@ pub struct Transaction {
 }
 
 impl Transaction {
-    pub fn get_transaction_id(self) -> Option<u32> {
+    pub fn get_transaction_id(&self) -> Option<u32> {
         if self.id > 0 {
             Some(self.id)
         } else {
