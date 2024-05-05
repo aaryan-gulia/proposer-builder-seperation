@@ -1,10 +1,9 @@
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Transaction {
     id: u32,
     pub gas_amount: f64,
     pub max_mev_amount: f64,
     pub transaction_type: TransactionType,
-    pub node_signature: Option<String>,
 }
 
 impl Transaction {
@@ -16,8 +15,7 @@ impl Transaction {
         }
     }
 }
-
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum TransactionType {
     Normal,
     Attack,
@@ -28,7 +26,6 @@ pub struct TransactionBuilder {
     gas_amount: Option<f64>,
     max_mev_amount: Option<f64>,
     transaction_type: Option<TransactionType>,
-    node_signature: Option<String>,
 }
 
 impl TransactionBuilder {
@@ -38,7 +35,6 @@ impl TransactionBuilder {
             gas_amount: None,
             max_mev_amount: None,
             transaction_type: None,
-            node_signature: None,
         }
     }
 }
@@ -62,11 +58,6 @@ impl TransactionBuilder {
         self
     }
 
-    pub fn node_signature(mut self, node_signature: String) -> Self {
-        self.node_signature = Some(node_signature);
-        self
-    }
-
     pub fn build(self) -> Result<Transaction, TransactionBuilderError> {
         let gas_amount = self
             .gas_amount
@@ -77,7 +68,6 @@ impl TransactionBuilder {
         let transaction_type = self
             .transaction_type
             .ok_or(TransactionBuilderError::MissingTransactionType)?;
-        let node_signature = self.node_signature;
 
         let id = match transaction_type {
             TransactionType::Normal => unsafe {
@@ -95,7 +85,6 @@ impl TransactionBuilder {
             gas_amount,
             max_mev_amount,
             transaction_type,
-            node_signature,
         })
     }
 }
