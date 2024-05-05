@@ -18,4 +18,9 @@ fn builder_mempool_function() {
     }
     b.collect_transaction(&transaction_vec);
     assert_eq!(transaction_vec.len(), b.mempool.len());
+
+    b.mempool = vec![];
+    b.characteristic = 0.01;
+    b.collect_transaction(&transaction_vec);
+    assert!(transaction_vec.len() > b.mempool.len());
 }
