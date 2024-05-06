@@ -4,7 +4,7 @@ use crate::entities::proposer;
 use crate::entities::traits;
 #[test]
 fn builder_mempool_function() {
-    let mut b = builder::Builder::new();
+    let mut b = builder::Builder::new(1, 1.0);
     let mut transaction_vec: Vec<transaction::Transaction> = vec![];
     for _ in 0..10 {
         let t = transaction::TransactionBuilder::new();

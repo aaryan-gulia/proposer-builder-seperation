@@ -10,10 +10,10 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn new() -> Self {
+    pub fn new(builder_id: u32, characteristic: f64) -> Self {
         Builder {
-            builder_id: 1,
-            characteristic: 1.0,
+            builder_id,
+            characteristic,
             mempool: vec![],
         }
     }
