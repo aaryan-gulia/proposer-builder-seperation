@@ -1,8 +1,8 @@
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Transaction {
     id: u32,
-    pub gas_amount: f64,
-    pub max_mev_amount: f64,
+    pub gas_amount: i64,
+    pub max_mev_amount: i64,
     pub transaction_type: TransactionType,
 }
 
@@ -15,7 +15,7 @@ impl Transaction {
         }
     }
 }
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransactionType {
     Normal,
     Attack,
@@ -23,8 +23,8 @@ pub enum TransactionType {
 
 pub struct TransactionBuilder {
     id: Option<u32>,
-    gas_amount: Option<f64>,
-    max_mev_amount: Option<f64>,
+    gas_amount: Option<i64>,
+    max_mev_amount: Option<i64>,
     transaction_type: Option<TransactionType>,
 }
 
@@ -43,12 +43,12 @@ static mut NORMAL_TRANSACTION_COUNTER: u32 = 0;
 static mut ATTACK_TRANSACTION_COUNTER: u32 = 0;
 
 impl TransactionBuilder {
-    pub fn gas_amount(mut self, gas_amount: f64) -> Self {
+    pub fn gas_amount(mut self, gas_amount: i64) -> Self {
         self.gas_amount = Some(gas_amount);
         self
     }
 
-    pub fn max_mev_amount(mut self, max_mev_amount: f64) -> Self {
+    pub fn max_mev_amount(mut self, max_mev_amount: i64) -> Self {
         self.max_mev_amount = Some(max_mev_amount);
         self
     }

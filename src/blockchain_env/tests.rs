@@ -13,8 +13,8 @@ fn new_error_transaction() {
 fn new_correct_transaction() {
     let t = transaction::TransactionBuilder::new();
     let t = t
-        .gas_amount(100.0)
-        .max_mev_amount(100.0)
+        .gas_amount(100)
+        .max_mev_amount(100)
         .transaction_type(transaction::TransactionType::Normal)
         .build()
         .unwrap();
