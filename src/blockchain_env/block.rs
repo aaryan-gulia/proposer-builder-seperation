@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Block {
     pub builder_id: u32,
     pub proposer_id: Option<u32>,
@@ -27,14 +27,26 @@ impl Block {
         }
     }
 
-    pub fn add_to_chain(&mut self) {
+    pub fn add_to_chain(&mut self, proposer_id: u32) {
         unsafe {
             BLOCK_POSITION_INDEX += 1;
             self.block_index = Some(BLOCK_POSITION_INDEX);
         }
+        self.proposer_id = Some(proposer_id);
     }
 
     pub fn get_block_index(&mut self) -> Option<u32> {
         self.block_index
+    }
+
+    pub fn compare_blocks_by_bid(a: &Block, b: &Block) -> std::cmp::Ordering {
+        if a.block_inclusion_bid < b.block_inclusion_bid {
+            return std::cmp::Ordering::Greater;
+        }
+        if a.block_inclusion_bid == b.block_inclusion_bid {
+            return std::cmp::Ordering::Equal;
+        } else {
+            return std::cmp::Ordering::Greater;
+        }
     }
 }

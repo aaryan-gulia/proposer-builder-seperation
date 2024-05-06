@@ -1,5 +1,7 @@
 use crate::blockchain_env::block;
 use crate::blockchain_env::transaction;
+use crate::entities::builder;
+use crate::entities::proposer;
 use rand::Rng;
 
 pub trait Entity {
@@ -15,5 +17,24 @@ pub trait Builder: Entity {
                 self.access_mempool().push(t);
             }
         }
+    }
+}
+
+pub trait Proposer {
+    fn run_auction(
+        &self,
+        builders_vec: &mut Vec<builder::Builder>,
+        block_size: u32,
+    ) -> block::Block {
+        let mut submitted_blocks: Vec<block::Block> = vec![];
+        for b in builders_vec {
+            submitted_blocks.push(b.build_block(block_size));
+        }
+        submitted_blocks.sort_unstable_by(block::Block::compare_blocks_by_bid);
+        submitted_blocks[0]
+    }
+
+    fn propose_block(&self, p: &proposer::Proposer, proposed_block: &mut block::Block) {
+        proposed_block.add_to_chain(p.id);
     }
 }

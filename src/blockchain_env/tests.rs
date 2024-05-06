@@ -24,11 +24,11 @@ fn new_correct_transaction() {
 #[test]
 fn new_block() {
     let mut b1 = block::Block::new(1, 1.0, 1.0, 1.0);
-    b1.add_to_chain();
+    b1.add_to_chain(3);
     assert_eq!(b1.builder_id, 1);
     assert_eq!(b1.get_block_index().unwrap(), 1);
     let mut b2 = block::Block::new(1, 1.0, 1.0, 1.0);
     assert_eq!(b2.get_block_index(), None);
-    b2.add_to_chain();
+    b2.add_to_chain(3);
     assert_eq!(b2.get_block_index().unwrap(), 2);
 }

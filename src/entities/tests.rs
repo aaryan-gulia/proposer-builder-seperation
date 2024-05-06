@@ -1,7 +1,7 @@
 use crate::blockchain_env::transaction;
 use crate::entities::builder;
 use crate::entities::proposer;
-use crate::entities::traits;
+use crate::entities::traits::Proposer;
 use std::collections::HashSet;
 
 #[test]
@@ -46,4 +46,27 @@ fn builder_build_block() {
     let b_block = b.build_block(block_size);
     assert_eq!(350, b_block.gas_captured as i32);
     assert_eq!(0, b_block.mev_captured as i32);
+}
+
+#[test]
+fn proposer_basic_auction() {
+    let mut builders_vec: Vec<builder::Builder> = vec![];
+    let mut transactions_set: HashSet<transaction::Transaction> = vec![].into_iter().collect();
+    for i in 0..10 {
+        let t = transaction::TransactionBuilder::new();
+        let t = t
+            .gas_amount(i * 10)
+            .max_mev_amount(i * 10)
+            .transaction_type(transaction::TransactionType::Normal)
+            .build()
+            .unwrap();
+        transactions_set.insert(t);
+    }
+    for id in 1..=1 {
+        builders_vec.push(builder::Builder::new(id, 0.5));
+        builders_vec[(id - 1) as usize].collect_transaction(&transactions_set);
+    }
+    let p = proposer::Proposer::new(6);
+    let mut proposed_block = p.run_auction(&mut builders_vec, 5);
+    p.propose_block(&p, &mut proposed_block)
 }
