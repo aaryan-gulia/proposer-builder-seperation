@@ -1,3 +1,4 @@
+use crate::blockchain_env::block;
 use crate::blockchain_env::transaction;
 use crate::entities::traits;
 use rand::distributions::{Distribution, Uniform};
@@ -25,5 +26,33 @@ impl Builder {
                 self.mempool.insert(*t);
             }
         }
+    }
+    pub fn build_block(&self, block_size: u32) -> block::Block {
+        let mut block_transactions: HashSet<&transaction::Transaction> =
+            vec![].into_iter().collect();
+        let mut min_gas_in_block: i64 = 0;
+        let mut gas_vec: Vec<transaction::Transaction> = vec![];
+        for &t in &self.mempool {
+            gas_vec.push(t);
+        }
+        gas_vec.sort_unstable_by(transaction::Transaction::compare_transaction_by_gas);
+        if block_size > gas_vec.len() as u32 {
+            let block_size = gas_vec.len() as u32;
+        }
+        let mev_captured = 0;
+        let mut gas_captured = 0;
+        for i in 0..block_size {
+            gas_captured += gas_vec[i as usize].gas_amount;
+        }
+        let bid = Builder::calculate_bid();
+        block::Block::new(
+            self.builder_id,
+            gas_captured as f64,
+            mev_captured as f64,
+            bid,
+        )
+    }
+    pub fn calculate_bid() -> f64 {
+        0.0
     }
 }

@@ -14,6 +14,16 @@ impl Transaction {
             None
         }
     }
+    pub fn compare_transaction_by_gas(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+        if a.gas_amount < b.gas_amount {
+            return std::cmp::Ordering::Greater;
+        }
+        if a.gas_amount == b.gas_amount {
+            return std::cmp::Ordering::Equal;
+        } else {
+            return std::cmp::Ordering::Less;
+        }
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransactionType {
