@@ -3,7 +3,8 @@ pub mod setup {
     use crate::blockchain_env::*;
     use crate::entities::*;
     use rand::thread_rng;
-    use rand_distr::{Distribution, Normal, NormalError};
+    use rand_distr::{Distribution, Normal, NormalError, Uniform};
+    use std::collections::HashSet;
     pub fn initiate_builders(
         num_builders: u32,
         builder_characteristic: f64,
@@ -35,5 +36,25 @@ pub mod setup {
             builder_vec.push(builder::Builder::new(id, normal.sample(&mut rng)));
         }
         builder_vec
+    }
+
+    pub fn initiate_transactions_default(
+        num_transaction: u32,
+    ) -> HashSet<transaction::Transaction> {
+        transaction::TransactionBuilder::reset();
+        let mut transaction_set: HashSet<transaction::Transaction> = vec![].into_iter().collect();
+        let mut rng = thread_rng();
+        let uniform = Uniform::new(0.0, 100.0);
+        for _ in 0..num_transaction {
+            let mut t = transaction::TransactionBuilder::new();
+            let mut t = t
+                .gas_amount(uniform.sample(&mut rng) as i64)
+                .max_mev_amount(uniform.sample(&mut rng) as i64)
+                .transaction_type(transaction::TransactionType::Normal)
+                .build()
+                .expect("initiate_transaction_default() failing. transaction build failing");
+            transaction_set.insert(t);
+        }
+        transaction_set
     }
 }
