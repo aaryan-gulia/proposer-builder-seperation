@@ -27,6 +27,15 @@ impl Builder {
             }
         }
     }
+    pub fn clean_transactions(&mut self, remove_transactions: &HashSet<transaction::Transaction>) {
+        let temp_mempool = self.mempool.clone();
+        let new_mempool: HashSet<&transaction::Transaction> =
+            temp_mempool.difference(remove_transactions).collect();
+        self.mempool.clear();
+        for t in new_mempool {
+            self.mempool.insert(*t);
+        }
+    }
     pub fn build_block(&self, mut block_size: u32) -> block::Block {
         let mut gas_vec: Vec<transaction::Transaction> = vec![];
         for &t in &self.mempool {

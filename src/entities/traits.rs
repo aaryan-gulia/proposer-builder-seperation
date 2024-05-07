@@ -27,10 +27,13 @@ pub trait Proposer {
         block_size: u32,
     ) -> block::Block {
         let mut submitted_blocks: Vec<block::Block> = vec![];
-        for b in builders_vec {
+        for b in builders_vec.iter() {
             submitted_blocks.push(b.build_block(block_size));
         }
         submitted_blocks.sort_unstable_by(block::Block::compare_blocks_by_bid);
+        for b in builders_vec.iter_mut() {
+            b.clean_transactions(&submitted_blocks[0].transactions)
+        }
         submitted_blocks[0].clone()
     }
 
