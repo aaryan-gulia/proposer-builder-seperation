@@ -1,4 +1,4 @@
-pub mod setup {
+pub mod init {
 
     use crate::blockchain_env::*;
     use crate::entities::*;
@@ -56,5 +56,32 @@ pub mod setup {
             transaction_set.insert(t);
         }
         transaction_set
+    }
+}
+
+pub mod maintain {
+
+    use crate::blockchain_env::*;
+    use crate::entities::*;
+    use rand::thread_rng;
+    use rand_distr::{Distribution, Normal, NormalError, Uniform};
+    use std::collections::HashSet;
+
+    use super::init::initiate_transactions_default;
+
+    pub fn refill_transactions_default(
+        num_transactions: u32,
+        transactions: &mut HashSet<transaction::Transaction>,
+    ) {
+        let temp_transactions = transactions.clone();
+        let num_new_transactions = num_transactions - transactions.len() as u32;
+        let new_transactions = initiate_transactions_default(num_new_transactions);
+        let transactions_union: HashSet<&transaction::Transaction> =
+            temp_transactions.union(&new_transactions).collect();
+
+        transactions.clear();
+        for t in transactions_union {
+            transactions.insert(*t);
+        }
     }
 }

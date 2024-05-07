@@ -1,6 +1,6 @@
 use proposer_builder_seperation::blockchain_env::*;
 use proposer_builder_seperation::entities::*;
-use proposer_builder_seperation::setup::setup::*;
+use proposer_builder_seperation::setup::init::*;
 use proposer_builder_seperation::simulation::*;
 use std::collections::HashSet;
 

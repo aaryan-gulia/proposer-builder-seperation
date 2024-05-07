@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Transaction {
     id: u32,
@@ -22,6 +24,26 @@ impl Transaction {
             return std::cmp::Ordering::Equal;
         } else {
             return std::cmp::Ordering::Less;
+        }
+    }
+
+    pub fn compare_transaction_by_mev(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+        if a.gas_amount < b.max_mev_amount {
+            return std::cmp::Ordering::Greater;
+        }
+        if a.gas_amount == b.max_mev_amount {
+            return std::cmp::Ordering::Equal;
+        } else {
+            return std::cmp::Ordering::Less;
+        }
+    }
+
+    pub fn clean_transaction_set(first: &mut HashSet<Transaction>, second: &HashSet<Transaction>) {
+        let temp = first.clone();
+        let new: HashSet<&Transaction> = temp.difference(second).collect();
+        first.clear();
+        for t in new {
+            first.insert(*t);
         }
     }
 }
