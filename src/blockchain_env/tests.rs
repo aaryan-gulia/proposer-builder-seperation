@@ -11,6 +11,7 @@ fn new_error_transaction() {
 
 #[test]
 fn new_correct_transaction() {
+    transaction::TransactionBuilder::reset();
     let t = transaction::TransactionBuilder::new();
     let t = t
         .gas_amount(100)

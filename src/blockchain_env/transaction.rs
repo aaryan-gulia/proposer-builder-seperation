@@ -39,6 +39,12 @@ pub struct TransactionBuilder {
 }
 
 impl TransactionBuilder {
+    pub fn reset() {
+        unsafe {
+            NORMAL_TRANSACTION_COUNTER = 0;
+            ATTACK_TRANSACTION_COUNTER = 0;
+        }
+    }
     pub fn new() -> Self {
         TransactionBuilder {
             id: None,
