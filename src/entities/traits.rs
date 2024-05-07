@@ -32,7 +32,7 @@ pub trait Proposer {
         }
         submitted_blocks.sort_unstable_by(block::Block::compare_blocks_by_bid);
         for b in builders_vec.iter_mut() {
-            b.clean_transactions(&submitted_blocks[0].transactions)
+            b.clean_mempools(&submitted_blocks[0].transactions)
         }
         submitted_blocks[0].clone()
     }

@@ -27,7 +27,7 @@ impl Builder {
             }
         }
     }
-    pub fn clean_transactions(&mut self, remove_transactions: &HashSet<transaction::Transaction>) {
+    pub fn clean_mempools(&mut self, remove_transactions: &HashSet<transaction::Transaction>) {
         let temp_mempool = self.mempool.clone();
         let new_mempool: HashSet<&transaction::Transaction> =
             temp_mempool.difference(remove_transactions).collect();
