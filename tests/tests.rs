@@ -12,8 +12,8 @@ fn simple_pbs() {
     let builder_characteristic: f64 = 0.5;
     let num_blocks: u32 = 500;
 
-    let builder_vec = initiate_builders(num_builders, builder_characteristic);
-    let proposer_vec = initiate_proposers(num_proposers);
+    let mut builder_vec = initiate_builders(num_builders, builder_characteristic);
+    let mut proposer_vec = initiate_proposers(num_proposers);
 
     assert_eq!(100, builder_vec.len());
     assert_eq!(5, proposer_vec.len());
@@ -21,5 +21,10 @@ fn simple_pbs() {
     let mut transaction_set: HashSet<transaction::Transaction> =
         initiate_transactions_default(num_transactions);
 
-    execute_simulation(num_blocks);
+    let blockchain = execute_simulation(
+        num_blocks,
+        &mut builder_vec,
+        &mut proposer_vec,
+        transaction_set,
+    );
 }
