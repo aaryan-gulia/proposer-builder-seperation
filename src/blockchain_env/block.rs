@@ -1,4 +1,7 @@
-#[derive(Debug, Copy, Clone)]
+use crate::blockchain_env::transaction;
+use std::collections::HashSet;
+
+#[derive(Debug, Clone)]
 pub struct Block {
     pub builder_id: u32,
     pub proposer_id: Option<u32>,
@@ -6,8 +9,8 @@ pub struct Block {
     pub mev_captured: f64,
     pub block_inclusion_bid: f64,
     block_index: Option<u32>,
+    pub transactions: HashSet<transaction::Transaction>,
 }
-
 static mut BLOCK_POSITION_INDEX: u32 = 0;
 
 impl Block {
@@ -16,6 +19,7 @@ impl Block {
         gas_captured: f64,
         mev_captured: f64,
         block_inclusion_bid: f64,
+        transaction_set: HashSet<transaction::Transaction>,
     ) -> Self {
         Block {
             builder_id,
@@ -24,6 +28,7 @@ impl Block {
             mev_captured,
             block_inclusion_bid,
             block_index: None,
+            transactions: transaction_set,
         }
     }
 

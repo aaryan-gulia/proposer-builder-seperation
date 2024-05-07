@@ -31,7 +31,7 @@ pub trait Proposer {
             submitted_blocks.push(b.build_block(block_size));
         }
         submitted_blocks.sort_unstable_by(block::Block::compare_blocks_by_bid);
-        submitted_blocks[0]
+        submitted_blocks[0].clone()
     }
 
     fn propose_block(&self, p: &proposer::Proposer, proposed_block: &mut block::Block) {

@@ -38,8 +38,11 @@ impl Builder {
         }
         let mev_captured = 0;
         let mut gas_captured = 0;
+        let mut transactions_in_block: HashSet<transaction::Transaction> =
+            vec![].into_iter().collect();
         for i in 0..block_size {
             gas_captured += gas_vec[i as usize].gas_amount;
+            transactions_in_block.insert(gas_vec[i as usize].clone());
         }
         let bid = Builder::calculate_bid();
         block::Block::new(
@@ -47,6 +50,7 @@ impl Builder {
             gas_captured as f64,
             mev_captured as f64,
             bid,
+            transactions_in_block,
         )
     }
     pub fn calculate_bid() -> f64 {
