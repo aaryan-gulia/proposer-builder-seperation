@@ -17,6 +17,9 @@ pub fn execute_simulation(
     let mut rng = thread_rng();
     let uniform = Uniform::new(0, proposer_vec.len() as usize);
     for block_index in 1..=num_blocks {
+        for b in builder_vec.iter_mut() {
+            b.collect_transaction(&transaction_set);
+        }
         let block_proposer = uniform.sample(&mut rng);
         let mut proposed_block = proposer_vec[block_proposer].run_auction(builder_vec, 10);
         proposer_vec[block_proposer]

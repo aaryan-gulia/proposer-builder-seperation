@@ -27,14 +27,9 @@ impl Builder {
             }
         }
     }
+
     pub fn clean_mempools(&mut self, remove_transactions: &HashSet<transaction::Transaction>) {
-        let temp_mempool = self.mempool.clone();
-        let new_mempool: HashSet<&transaction::Transaction> =
-            temp_mempool.difference(remove_transactions).collect();
-        self.mempool.clear();
-        for t in new_mempool {
-            self.mempool.insert(*t);
-        }
+        self.mempool.retain(|t| !remove_transactions.contains(t));
     }
     pub fn build_block(&self, mut block_size: u32) -> block::Block {
         let mut gas_vec: Vec<transaction::Transaction> = vec![];
@@ -53,7 +48,7 @@ impl Builder {
             gas_captured += gas_vec[i as usize].gas_amount;
             transactions_in_block.insert(gas_vec[i as usize].clone());
         }
-        let bid = Builder::calculate_bid();
+        let bid = Builder::calculate_bid(gas_captured + mev_captured);
         block::Block::new(
             self.builder_id,
             gas_captured as f64,
@@ -62,7 +57,7 @@ impl Builder {
             transactions_in_block,
         )
     }
-    pub fn calculate_bid() -> f64 {
-        0.0
+    pub fn calculate_bid(block_value: i64) -> f64 {
+        block_value as f64
     }
 }

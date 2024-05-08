@@ -16,14 +16,14 @@ pub fn save_blockchain_to_csv(
     let mut wtr = WriterBuilder::new()
         .has_headers(false)
         .from_path(file_name)?;
-    wtr.write_record(&[
-        "builder_id",
-        "proposer_id",
-        "gas_captured",
-        "mev_captured",
-        "block_bid",
-        "index",
-    ])?;
+    //    wtr.write_record(&[
+    //        "builder_id",
+    //        "proposer_id",
+    //        "gas_captured",
+    //        "mev_captured",
+    //        "block_bid",
+    //        "index",
+    //    ])?;
     for b in blockchain.iter() {
         wtr.serialize(b)?;
     }
