@@ -2,6 +2,7 @@ use proposer_builder_seperation::blockchain_env::*;
 use proposer_builder_seperation::entities::*;
 use proposer_builder_seperation::setup::init::*;
 use proposer_builder_seperation::simulation::*;
+use proposer_builder_seperation::stop::*;
 use std::collections::HashSet;
 
 #[test]
@@ -27,4 +28,7 @@ fn simple_pbs() {
         &mut proposer_vec,
         transaction_set,
     );
+    assert_ne!(blockchain.len(), 0);
+    save_blockchain_to_csv(&blockchain, "simple_pbs_test.csv")
+        .expect("save_blockchain_to_csv() failing from simple_pbs() test");
 }

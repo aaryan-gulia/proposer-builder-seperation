@@ -1,7 +1,9 @@
 use crate::blockchain_env::transaction;
+use crate::blockchain_env::transaction::serialize_as_string;
+use serde::Serialize;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Block {
     pub builder_id: u32,
     pub proposer_id: Option<u32>,

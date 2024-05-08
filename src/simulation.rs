@@ -26,6 +26,7 @@ pub fn execute_simulation(
             &proposed_block.transactions,
         );
         maintain::refill_transactions_default(num_transactions, &mut transaction_set);
+        blockchain.push(proposed_block);
     }
     blockchain
 }

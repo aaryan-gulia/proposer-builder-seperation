@@ -1,6 +1,7 @@
+use serde::Serialize;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Serialize, Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Transaction {
     id: u32,
     pub gas_amount: i64,
@@ -47,7 +48,7 @@ impl Transaction {
         }
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransactionType {
     Normal,
     Attack,
@@ -152,5 +153,24 @@ impl From<TransactionBuilderError> for String {
                 TransactionBuilderError::InvalidId => "invalid id",
             }
         }
+    }
+}
+
+pub mod serialize_as_string {
+    use super::Transaction;
+    use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<S>(d: &[Transaction], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut v = Vec::new();
+        let mut w = csv::Writer::from_writer(&mut v);
+        for record in d {
+            w.serialize(record).map_err(serde::ser::Error::custom)?;
+        }
+        drop(w);
+        let s = String::from_utf8(v).map_err(serde::ser::Error::custom)?;
+        serializer.serialize_str(&s)
     }
 }
