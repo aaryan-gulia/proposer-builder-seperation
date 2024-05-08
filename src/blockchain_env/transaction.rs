@@ -40,12 +40,7 @@ impl Transaction {
     }
 
     pub fn clean_transaction_set(first: &mut HashSet<Transaction>, second: &HashSet<Transaction>) {
-        let temp = first.clone();
-        let new: HashSet<&Transaction> = temp.difference(second).collect();
-        first.clear();
-        for t in new {
-            first.insert(*t);
-        }
+        first.retain(|t| !second.contains(t));
     }
 }
 #[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]

@@ -3,6 +3,8 @@ use crate::blockchain_env::transaction;
 use crate::entities::builder;
 use crate::entities::proposer;
 use rand::Rng;
+use rayon::prelude::*;
+use std::thread::available_parallelism;
 
 pub trait Entity {
     fn get_characteristic(&self) -> f64;
@@ -26,17 +28,22 @@ pub trait Proposer {
         builders_vec: &mut Vec<builder::Builder>,
         block_size: u32,
     ) -> block::Block {
-        let mut submitted_blocks: Vec<block::Block> = vec![];
-        for b in builders_vec.iter() {
-            submitted_blocks.push(b.build_block(block_size));
-        }
+        let mut submitted_blocks: Vec<block::Block> = builders_vec
+            .par_iter_mut() // Iterate in parallel using Rayon
+            .map(|b| b.build_block(block_size))
+            .collect();
         submitted_blocks.sort_unstable_by(block::Block::compare_blocks_by_bid);
-        for b in builders_vec.iter_mut() {
-            b.clean_mempools(&submitted_blocks[0].transactions)
-        }
+
+        let chunk_size = 10;
+        builders_vec
+            .par_chunks_mut(chunk_size)
+            .for_each(|builder_chunk| {
+                for builder in builder_chunk {
+                    builder.clean_mempools(&submitted_blocks[0].transactions);
+                }
+            });
         submitted_blocks[0].clone()
     }
-
     fn propose_block(&self, p: &proposer::Proposer, proposed_block: &mut block::Block) {
         proposed_block.add_to_chain(p.id);
     }

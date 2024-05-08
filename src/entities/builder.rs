@@ -33,10 +33,11 @@ impl Builder {
     }
     pub fn build_block(&self, mut block_size: u32) -> block::Block {
         let mut gas_vec: Vec<transaction::Transaction> = vec![];
-        for &t in &self.mempool {
-            gas_vec.push(t);
+        gas_vec.reserve(self.mempool.len());
+        for t in self.mempool.iter() {
+            gas_vec.push(*t);
         }
-        gas_vec.sort_by(transaction::Transaction::compare_transaction_by_gas);
+        gas_vec.sort_unstable_by(transaction::Transaction::compare_transaction_by_gas);
         if block_size > gas_vec.len() as u32 {
             block_size = gas_vec.len() as u32;
         }
@@ -44,7 +45,7 @@ impl Builder {
         let mut gas_captured = 0;
         let mut transactions_in_block: HashSet<transaction::Transaction> =
             vec![].into_iter().collect();
-        for i in 0..block_size {
+        for i in 0..std::cmp::min(block_size as usize, gas_vec.len()) {
             gas_captured += gas_vec[i as usize].gas_amount;
             transactions_in_block.insert(gas_vec[i as usize].clone());
         }
