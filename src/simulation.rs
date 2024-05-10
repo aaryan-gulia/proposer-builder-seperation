@@ -11,6 +11,7 @@ pub fn execute_simulation(
     builder_vec: &mut Vec<builder::Builder>,
     proposer_vec: &mut Vec<proposer::Proposer>,
     mut transaction_set: HashSet<transaction::Transaction>,
+    random_number_vec: &Vec<f64>,
 ) -> Vec<block::Block> {
     let mut blockchain: Vec<block::Block> = vec![];
     let num_transactions = transaction_set.len() as u32;
@@ -21,7 +22,12 @@ pub fn execute_simulation(
             b.collect_transaction(&transaction_set);
         }
         let block_proposer = uniform.sample(&mut rng);
-        let mut proposed_block = proposer_vec[block_proposer].run_auction(builder_vec, 10);
+        let mut proposed_block = proposer_vec[block_proposer].run_auction(
+            builder_vec,
+            10,
+            &blockchain,
+            random_number_vec,
+        );
         proposer_vec[block_proposer]
             .propose_block(&proposer_vec[block_proposer], &mut proposed_block);
         transaction::Transaction::clean_transaction_set(

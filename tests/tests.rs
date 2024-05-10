@@ -12,10 +12,11 @@ fn simple_pbs() {
     let num_proposers: u32 = 5;
     let num_transactions: u32 = 100;
     let builder_characteristic: f64 = 0.5;
-    let num_blocks: u32 = 500;
+    let num_blocks: u32 = 100;
 
     let mut builder_vec = initiate_builders(num_builders, builder_characteristic);
     let mut proposer_vec = initiate_proposers(num_proposers);
+    let rand_num_vec: Vec<f64> = get_random_numbers::<f64>(100000, 0.0, 1.0);
 
     assert_eq!(100, builder_vec.len());
     assert_eq!(5, proposer_vec.len());
@@ -34,6 +35,7 @@ fn simple_pbs() {
         &mut builder_vec,
         &mut proposer_vec,
         transaction_set,
+        &rand_num_vec,
     );
     assert_ne!(blockchain.len(), 0);
     save_blockchain_to_csv(&blockchain, "simple_pbs_test.csv")

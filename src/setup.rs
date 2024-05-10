@@ -57,6 +57,20 @@ pub mod init {
         }
         transaction_set
     }
+
+    pub fn get_random_numbers<T: rand_distr::uniform::SampleUniform>(
+        num_random_numbers: u32,
+        range_begin: T,
+        range_end: T,
+    ) -> Vec<T> {
+        let mut random_numbers: Vec<T> = Vec::with_capacity(num_random_numbers as usize);
+        let mut rng = thread_rng();
+        let uniform = Uniform::new(range_begin, range_end);
+        for _ in 0..num_random_numbers {
+            random_numbers.push(uniform.sample(&mut rng));
+        }
+        random_numbers
+    }
 }
 
 pub mod maintain {
