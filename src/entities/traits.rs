@@ -2,7 +2,8 @@ use crate::blockchain_env::block;
 use crate::blockchain_env::transaction;
 use crate::entities::builder;
 use crate::entities::proposer;
-use rand::Rng;
+use rand::prelude::SliceRandom;
+use rand::{thread_rng, Rng};
 use rayon::prelude::*;
 use std::thread::available_parallelism;
 
@@ -30,12 +31,27 @@ pub trait Proposer {
         blockchain: &Vec<block::Block>,
         random_numbers: &Vec<f64>,
     ) -> block::Block {
-        let mut submitted_blocks: Vec<block::Block> = builders_vec
+        let submitted_blocks: Vec<block::Block> = builders_vec
             .into_iter() // Iterate in parallel using Rayon
             .map(|b| b.build_block(block_size, blockchain, random_numbers))
             .collect();
-        submitted_blocks.sort_unstable_by(block::Block::compare_blocks_by_bid);
+        let winning_block: &block::Block = submitted_blocks
+            .iter()
+            .max_by_key(|b| b.block_inclusion_bid as u32)
+            .unwrap();
 
+        let highest_bid = submitted_blocks
+            .iter()
+            .max_by_key(|b| b.block_inclusion_bid as u32)
+            .unwrap()
+            .block_inclusion_bid;
+        let highest_bid_blocks = submitted_blocks
+            .iter()
+            .filter(|b| b.block_inclusion_bid as u32 == highest_bid as u32)
+            .collect::<Vec<_>>();
+
+        let mut rng = thread_rng();
+        let random_highest_bid_block = highest_bid_blocks.choose(&mut rng).unwrap();
         // let chunk_size = 100;
         // builders_vec
         //     .par_chunks_mut(chunk_size)
@@ -47,7 +63,7 @@ pub trait Proposer {
         builders_vec
             .into_iter()
             .for_each(|b| b.clean_mempools(&submitted_blocks[0].transactions));
-        submitted_blocks[0].clone()
+        (*random_highest_bid_block).clone()
     }
     fn propose_block(&self, p: &proposer::Proposer, proposed_block: &mut block::Block) {
         proposed_block.add_to_chain(p.id);

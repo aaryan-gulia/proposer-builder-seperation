@@ -4,7 +4,6 @@ use proposer_builder_seperation::setup::init::*;
 use proposer_builder_seperation::simulation::*;
 use proposer_builder_seperation::stop::*;
 use std::collections::HashSet;
-use std::panic::AssertUnwindSafe;
 
 fn main() {
     simple_pbs();
@@ -19,21 +18,13 @@ fn simple_pbs() {
 
     let mut builder_vec = initiate_builders(num_builders, builder_characteristic);
     let mut proposer_vec = initiate_proposers(num_proposers);
-    let rand_num_vec: Vec<f64> = get_random_numbers::<f64>(100000, 0.0, 1.0);
-
-    println!("{:?}", rand_num_vec);
+    let rand_num_vec: Vec<f64> = get_random_numbers::<f64>(10000000, 0.0, 1.0);
 
     assert_eq!(100, builder_vec.len());
     assert_eq!(5, proposer_vec.len());
 
-    let mut transaction_set: HashSet<transaction::Transaction> =
+    let transaction_set: HashSet<transaction::Transaction> =
         initiate_transactions_default(num_transactions);
-    let mut transaction_gas: i64 = 0;
-    for t in &transaction_set {
-        transaction_gas += t.gas_amount;
-    }
-    println!("{}", transaction_gas);
-    assert_ne!(transaction_gas, 0);
 
     let blockchain = execute_simulation(
         num_blocks,
