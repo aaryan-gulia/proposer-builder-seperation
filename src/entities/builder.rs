@@ -101,14 +101,16 @@ impl Builder {
                 if random_number > sample_size {
                     panic!();
                 }
-
-                total_utility += block_value
-                    - blockchain
+                if bid
+                    > blockchain
                         .get(random_number as usize)
                         .unwrap()
-                        .block_inclusion_bid as i64;
+                        .block_inclusion_bid as u32
+                {
+                    total_utility += block_value - bid as i64;
+                }
             }
-            if total_utility / 10 > max_utility {
+            if total_utility / 10 >= max_utility {
                 max_utility = total_utility / 10;
                 optimal_bid = bid;
             }

@@ -6,7 +6,10 @@ use proposer_builder_seperation::stop::*;
 use std::collections::HashSet;
 use std::panic::AssertUnwindSafe;
 
-#[test]
+fn main() {
+    simple_pbs();
+}
+
 fn simple_pbs() {
     let num_builders: u32 = 100;
     let num_proposers: u32 = 5;
