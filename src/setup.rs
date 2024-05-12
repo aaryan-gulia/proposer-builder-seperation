@@ -8,10 +8,15 @@ pub mod init {
     pub fn initiate_builders(
         num_builders: u32,
         builder_characteristic: f64,
-    ) -> Vec<builder::Builder> {
-        let mut builder_vec: Vec<builder::Builder> = vec![];
+    ) -> Vec<builder::BuilderType> {
+        let mut builder_vec: Vec<builder::BuilderType> = vec![];
         for id in 1..=num_builders {
-            builder_vec.push(builder::Builder::new(id, builder_characteristic));
+            builder_vec.push(builder::BuilderType::NormalBuilder(
+                builder::NormalBuilder {
+                    builder: builder::Builder::new(id, builder_characteristic),
+                    proposer: None,
+                },
+            ));
         }
         builder_vec
     }

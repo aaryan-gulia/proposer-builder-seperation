@@ -26,14 +26,21 @@ pub trait Builder: Entity {
 pub trait Proposer {
     fn run_auction(
         &self,
-        builders_vec: &mut Vec<builder::Builder>,
+        builders_vec: &mut Vec<builder::BuilderType>,
         block_size: u32,
         blockchain: &Vec<block::Block>,
         random_numbers: &Vec<f64>,
     ) -> block::Block {
         let submitted_blocks: Vec<block::Block> = builders_vec
             .into_iter() // Iterate in parallel using Rayon
-            .map(|b| b.build_block(block_size, blockchain, random_numbers))
+            .map(|b| match b {
+                builder::BuilderType::NormalBuilder(normal_builder) => {
+                    normal_builder.build_block(block_size, blockchain, random_numbers)
+                }
+                builder::BuilderType::MevBuilder(mev_builder) => {
+                    mev_builder.build_block(block_size, blockchain, random_numbers)
+                }
+            })
             .collect();
         let winning_block: &block::Block = submitted_blocks
             .iter()
@@ -60,9 +67,16 @@ pub trait Proposer {
         //             builder.clean_mempools(&submitted_blocks[0].transactions);
         //         }
         //     });
-        builders_vec
-            .into_iter()
-            .for_each(|b| b.clean_mempools(&submitted_blocks[0].transactions));
+        builders_vec.into_iter().for_each(|b| match b {
+            builder::BuilderType::NormalBuilder(normal_builder) => normal_builder
+                .builder
+                .clean_mempools(&winning_block.transactions),
+            builder::BuilderType::MevBuilder(mev_builder) => {
+                mev_builder
+                    .builder
+                    .clean_mempools(&random_highest_bid_block.transactions);
+            }
+        });
         (*random_highest_bid_block).clone()
     }
     fn propose_block(&self, p: &proposer::Proposer, proposed_block: &mut block::Block) {

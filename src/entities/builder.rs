@@ -6,19 +6,16 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::HashSet;
 
-struct NormalBuilderProposer;
-struct MevBuilderPorposer;
-
 pub enum BuilderType {
     NormalBuilder(NormalBuilder),
     MevBuilder(MevBuilder),
 }
 
-struct NormalBuilder {
+pub struct NormalBuilder {
     pub builder: Builder,
     pub proposer: Option<proposer::Proposer>,
 }
-struct MevBuilder {
+pub struct MevBuilder {
     pub builder: Builder,
     pub proposer: Option<proposer::Proposer>,
 }
@@ -99,6 +96,7 @@ impl NormalBuilder {
             gas_vec.push(*t);
         }
         gas_vec.sort_unstable_by(transaction::Transaction::compare_transaction_by_gas);
+        println!("{:?}", gas_vec);
         if block_size > gas_vec.len() as u32 {
             block_size = gas_vec.len() as u32;
         }
@@ -135,5 +133,16 @@ impl NormalBuilder {
             bid,
             transactions_in_block,
         )
+    }
+}
+
+impl MevBuilder {
+    pub fn build_block(
+        &self,
+        mut block_size: u32,
+        blockchain: &Vec<block::Block>,
+        random_numbers: &Vec<f64>,
+    ) -> block::Block {
+        todo!()
     }
 }
