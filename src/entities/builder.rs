@@ -6,6 +6,14 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::HashSet;
 
+struct NormalBuilder;
+struct MevBuilder;
+struct NormalBuilderProposer;
+struct MevBuilderPorposer;
+
+impl traits::Proposer for NormalBuilderProposer {}
+impl traits::Proposer for MevBuilderPorposer {}
+
 pub struct Builder {
     pub builder_id: u32,
     pub characteristic: f64,
