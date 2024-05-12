@@ -39,6 +39,16 @@ impl Transaction {
         }
     }
 
+    pub fn compare_transaction_by_total(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+        if a.gas_amount + a.max_mev_amount < b.gas_amount + b.max_mev_amount {
+            return std::cmp::Ordering::Greater;
+        }
+        if a.gas_amount + a.max_mev_amount == b.gas_amount + b.max_mev_amount {
+            return std::cmp::Ordering::Equal;
+        } else {
+            return std::cmp::Ordering::Less;
+        }
+    }
     pub fn clean_transaction_set(first: &mut HashSet<Transaction>, second: &HashSet<Transaction>) {
         first.retain(|t| !second.contains(t));
     }

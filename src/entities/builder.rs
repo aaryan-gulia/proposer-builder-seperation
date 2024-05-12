@@ -4,6 +4,7 @@ use crate::entities::{proposer, traits};
 use rand::distributions::{Distribution, Uniform};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use serde::de::value::EnumAccessDeserializer;
 use std::collections::HashSet;
 
 pub enum BuilderType {
@@ -96,7 +97,6 @@ impl NormalBuilder {
             gas_vec.push(*t);
         }
         gas_vec.sort_unstable_by(transaction::Transaction::compare_transaction_by_gas);
-        println!("{:?}", gas_vec);
         if block_size > gas_vec.len() as u32 {
             block_size = gas_vec.len() as u32;
         }
@@ -143,6 +143,41 @@ impl MevBuilder {
         blockchain: &Vec<block::Block>,
         random_numbers: &Vec<f64>,
     ) -> block::Block {
-        todo!()
+        let mut gas_vec: Vec<transaction::Transaction> = vec![];
+        let mut mev_gas_vec: Vec<transaction::Transaction> = vec![];
+        let curr_block_size = std::cmp::min(self.builder.mempool.len(), block_size as usize);
+        gas_vec.reserve(curr_block_size);
+        mev_gas_vec.reserve(curr_block_size);
+        for t in self.builder.mempool.iter() {
+            gas_vec.push(*t);
+            mev_gas_vec.push(*t);
+        }
+        gas_vec[0..curr_block_size]
+            .sort_unstable_by(transaction::Transaction::compare_transaction_by_gas);
+        gas_vec.drain(curr_block_size..);
+        mev_gas_vec[0..curr_block_size]
+            .sort_unstable_by(transaction::Transaction::compare_transaction_by_total);
+        mev_gas_vec.drain(curr_block_size..);
+        assert_eq!(mev_gas_vec.len(), curr_block_size);
+        assert_eq!(gas_vec.len(), curr_block_size);
+        let mut mev_captured = 0;
+        let mut gas_captured = 0;
+        let mut transactions_in_block: HashSet<transaction::Transaction> =
+            vec![].into_iter().collect();
+        let mut gas_ptr: usize = 0;
+        let mut mev_ptr: usize = 0;
+        while transactions_in_block.len() <= curr_block_size {
+            if gas_ptr >= curr_block_size && mev_ptr >= curr_block_size {
+                break;
+            }
+        }
+
+        block::Block::new(
+            self.builder.id,
+            gas_captured as f64,
+            mev_captured as f64,
+            0.0,
+            transactions_in_block,
+        )
     }
 }
