@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 pub fn execute_simulation(
     num_blocks: u32,
-    builder_vec: &mut Vec<builder::Builder>,
+    builder_vec: &mut Vec<builder::BuilderType>,
     proposer_vec: &mut Vec<proposer::Proposer>,
     mut transaction_set: HashSet<transaction::Transaction>,
     random_number_vec: &Vec<f64>,
@@ -19,7 +19,14 @@ pub fn execute_simulation(
     let uniform = Uniform::new(0, proposer_vec.len() as usize);
     for block_index in 1..=num_blocks {
         for b in builder_vec.iter_mut() {
-            b.collect_transaction(&transaction_set);
+            match b {
+                builder::BuilderType::NormalBuilder(b) => {
+                    b.builder.collect_transaction(&transaction_set)
+                }
+                builder::BuilderType::MevBuilder(b) => {
+                    b.builder.collect_transaction(&transaction_set)
+                }
+            }
         }
         let block_proposer = uniform.sample(&mut rng);
         let mut proposed_block = proposer_vec[block_proposer].run_auction(
