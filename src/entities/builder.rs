@@ -167,17 +167,156 @@ impl MevBuilder {
         let mut gas_ptr: usize = 0;
         let mut mev_ptr: usize = 0;
         while transactions_in_block.len() <= curr_block_size {
-            if gas_ptr >= curr_block_size && mev_ptr >= curr_block_size {
+            let curr_gas_tx = gas_vec.get(gas_ptr);
+            let curr_mev_tx = mev_gas_vec.get(mev_ptr);
+            if curr_gas_tx.is_none() && curr_mev_tx.is_none() {
                 break;
+            } else if curr_gas_tx.is_none() {
+                if transactions_in_block.contains(curr_mev_tx.unwrap()) {
+                    mev_ptr += 1;
+                    continue;
+                }
+                if curr_block_size - 1 > transactions_in_block.len() {
+                    let next_mev_tx = mev_gas_vec.get(mev_ptr + 1);
+                    match next_mev_tx {
+                        Some(t) => {
+                            if t.gas_amount
+                                + curr_mev_tx
+                                    .expect("this block should have a valid curr_mev_tx")
+                                    .gas_amount
+                                < curr_mev_tx.unwrap().gas_amount
+                                    + curr_mev_tx.unwrap().max_mev_amount
+                            {
+                                mev_captured += curr_mev_tx.unwrap().max_mev_amount;
+                                gas_captured += curr_mev_tx.unwrap().gas_amount;
+                                self.attack_transaction(
+                                    &mut transactions_in_block,
+                                    *curr_mev_tx.unwrap(),
+                                );
+                                mev_ptr += 1;
+                            } else {
+                                gas_captured += curr_mev_tx.unwrap().gas_amount;
+                                transactions_in_block.insert(*curr_mev_tx.unwrap());
+                                mev_ptr += 1;
+                            }
+                        }
+                        None => {
+                            mev_captured += curr_mev_tx.unwrap().max_mev_amount;
+                            gas_captured += curr_mev_tx.unwrap().gas_amount;
+                            self.attack_transaction(
+                                &mut transactions_in_block,
+                                *curr_mev_tx.unwrap(),
+                            );
+                            mev_ptr += 1;
+                        }
+                    }
+                } else {
+                    gas_captured += curr_mev_tx.unwrap().gas_amount;
+                    transactions_in_block.insert(*curr_mev_tx.unwrap());
+                    mev_ptr += 1
+                }
+            } else if curr_mev_tx.is_none() {
+                if transactions_in_block.contains(curr_gas_tx.unwrap()) {
+                    gas_ptr += 1;
+                    continue;
+                }
+                gas_captured += curr_gas_tx.unwrap().gas_amount;
+                transactions_in_block.insert(*curr_gas_tx.unwrap());
+                gas_ptr += 1;
+            } else {
+                if transactions_in_block.contains(curr_mev_tx.unwrap()) {
+                    mev_ptr += 1;
+                    continue;
+                }
+                if transactions_in_block.contains(curr_gas_tx.unwrap()) {
+                    gas_ptr += 1;
+                    continue;
+                }
+                if curr_block_size - 1 <= transactions_in_block.len() {
+                    gas_captured += curr_gas_tx.unwrap().gas_amount;
+                    transactions_in_block.insert(*curr_gas_tx.unwrap());
+                    gas_ptr += 1;
+                    continue;
+                }
+                let next_gas_tx = gas_vec.get(gas_ptr + 1);
+                match next_gas_tx {
+                    Some(t) => {
+                        if t.gas_amount + curr_gas_tx.unwrap().gas_amount
+                            < curr_mev_tx.unwrap().max_mev_amount + curr_mev_tx.unwrap().gas_amount
+                        {
+                            mev_captured += curr_mev_tx.unwrap().max_mev_amount;
+                            gas_captured += curr_mev_tx.unwrap().gas_amount;
+                            self.attack_transaction(
+                                &mut transactions_in_block,
+                                *curr_mev_tx.unwrap(),
+                            );
+                            mev_ptr += 1;
+                        } else {
+                            gas_captured += curr_gas_tx.unwrap().gas_amount;
+                            transactions_in_block.insert(*curr_gas_tx.unwrap());
+                            gas_ptr += 1;
+                        }
+                    }
+                    None => {
+                        if curr_gas_tx.unwrap().gas_amount
+                            < curr_mev_tx.unwrap().gas_amount + curr_mev_tx.unwrap().max_mev_amount
+                        {
+                            mev_captured += curr_mev_tx.unwrap().max_mev_amount;
+                            gas_captured += curr_mev_tx.unwrap().gas_amount;
+                            self.attack_transaction(
+                                &mut transactions_in_block,
+                                *curr_mev_tx.unwrap(),
+                            );
+                            mev_ptr += 1;
+                        } else {
+                            gas_captured += curr_gas_tx.unwrap().gas_amount;
+                            transactions_in_block.insert(*curr_gas_tx.unwrap());
+                            gas_ptr += 1;
+                        }
+                    }
+                }
             }
         }
 
+        let mut bid: f64 = 0.0;
+        if blockchain.len() > 10 {
+            bid = Builder::calculate_bid(
+                gas_captured + mev_captured,
+                &blockchain[blockchain.len() - 10..],
+                10,
+                random_numbers,
+            );
+        } else if blockchain.len() == 0 {
+            bid = ((gas_captured + mev_captured) / 2) as f64
+        } else {
+            bid = Builder::calculate_bid(
+                gas_captured + mev_captured,
+                &blockchain[..],
+                blockchain.len() as u32,
+                random_numbers,
+            )
+        }
         block::Block::new(
             self.builder.id,
             gas_captured as f64,
             mev_captured as f64,
-            0.0,
+            bid,
             transactions_in_block,
         )
+    }
+
+    pub fn attack_transaction(
+        &self,
+        transactions: &mut HashSet<transaction::Transaction>,
+        mut mev_tx: transaction::Transaction,
+    ) {
+        transactions.insert(*mev_tx.attack_transaction());
+        let mut attack_tx = transaction::TransactionBuilder::new();
+        let attack_tx = attack_tx
+            .gas_amount(0)
+            .max_mev_amount(0)
+            .transaction_type(transaction::TransactionType::Attack)
+            .build();
+        transactions.insert(attack_tx.unwrap());
     }
 }

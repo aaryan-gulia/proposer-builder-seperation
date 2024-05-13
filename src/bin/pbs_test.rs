@@ -14,7 +14,7 @@ fn simple_pbs() {
     let num_proposers: u32 = 5;
     let num_transactions: u32 = 100;
     let builder_characteristic: f64 = 0.5;
-    let num_blocks: u32 = 100;
+    let num_blocks: u32 = 50000;
 
     let mut builder_vec = initiate_builders(num_builders, builder_characteristic);
     let mut proposer_vec = initiate_proposers(num_proposers);

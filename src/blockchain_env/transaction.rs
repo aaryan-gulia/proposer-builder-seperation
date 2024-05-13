@@ -17,6 +17,10 @@ impl Transaction {
             None
         }
     }
+    pub fn attack_transaction(&mut self) -> &mut Self {
+        self.transaction_type = TransactionType::Attacked;
+        self
+    }
     pub fn compare_transaction_by_gas(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
         if a.gas_amount < b.gas_amount {
             return std::cmp::Ordering::Greater;
@@ -57,6 +61,7 @@ impl Transaction {
 pub enum TransactionType {
     Normal,
     Attack,
+    Attacked,
 }
 
 pub struct TransactionBuilder {
@@ -122,6 +127,7 @@ impl TransactionBuilder {
                 ATTACK_TRANSACTION_COUNTER += 1;
                 ATTACK_TRANSACTION_COUNTER
             },
+            _ => return Err(TransactionBuilderError::MissingTransactionType),
         };
 
         Ok(Transaction {
