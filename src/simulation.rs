@@ -42,7 +42,7 @@ pub fn execute_simulation(
             &proposed_block.transactions,
         );
         maintain::refill_transactions_default(num_transactions, &mut transaction_set);
-        println!("{}", &proposed_block.get_block_index().unwrap());
+        //println!("{}", &proposed_block.get_block_index().unwrap());
         blockchain.push(proposed_block);
     }
     blockchain
