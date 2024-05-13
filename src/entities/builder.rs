@@ -25,11 +25,15 @@ pub struct Builder {
     pub characteristic: f64,
     pub mempool: HashSet<transaction::Transaction>,
 }
-
+static mut BUILDER_ID_COUNTER: u32 = 0;
 impl Builder {
     pub fn new(id: u32, characteristic: f64) -> Self {
+        unsafe {
+            BUILDER_ID_COUNTER += 1;
+        }
+
         Builder {
-            id,
+            id: unsafe { BUILDER_ID_COUNTER },
             characteristic,
             mempool: vec![].into_iter().collect(),
         }

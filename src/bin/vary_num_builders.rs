@@ -4,7 +4,9 @@ use proposer_builder_seperation::entities::*;
 use proposer_builder_seperation::setup::init::*;
 use proposer_builder_seperation::simulation::*;
 use proposer_builder_seperation::stop::*;
+use rayon::prelude::*;
 use std::collections::HashSet;
+use std::thread::available_parallelism;
 
 fn main() {
     vary_num_builders();
@@ -19,7 +21,9 @@ fn vary_num_builders() {
 
     let rand_num_vec: Vec<f64> = get_random_numbers::<f64>(100000000, 0.0, 1.0);
 
-    for num_builders in 1..=NUM_BUILDERS {
+    let num_builders_vec: Vec<u32> = (1..=NUM_BUILDERS).collect(); // Parallelize the outer loop iterating over num_builders
+    num_builders_vec.into_par_iter().for_each(|num_builders| {
+        // Inner loop for mev_builders can remain sequential
         for mev_builders in 0..=num_builders {
             println!(
                 "Completeing => num_builders: {}, mev_builders: {}",
@@ -36,18 +40,18 @@ fn vary_num_builders() {
                 NUM_BLOCKS,
                 &mut builder_vec,
                 &mut proposer_vec,
-                transaction_set,
+                transaction_set.clone(), // Clone required for parallel execution
                 &rand_num_vec,
             );
             let file_name = format!(
-                "data/vary_builder_and_mev/num_builders={}/mev_builder={}.csv",
+                "data/vary_builder_and_mev/num_builders={}mev_builder={}.csv",
                 num_builders, mev_builders
             );
 
             save_continuous_simulation_to_csv(&blockchain, &file_name)
                 .expect("save_blockchain_to_csv() failing from simple_pbs() test");
         }
-    }
+    });
 }
 
 fn vary_mev_builders() {}
