@@ -39,6 +39,13 @@ fn vary_num_builders() {
                 transaction_set,
                 &rand_num_vec,
             );
+            let file_name = format!(
+                "data/vary_builder_and_mev/num_builders={}/mev_builder={}.csv",
+                num_builders, mev_builders
+            );
+
+            save_continuous_simulation_to_csv(&blockchain, &file_name)
+                .expect("save_blockchain_to_csv() failing from simple_pbs() test");
         }
     }
 }

@@ -10,7 +10,7 @@ pub struct Block {
     pub gas_captured: f64,
     pub mev_captured: f64,
     pub block_inclusion_bid: f64,
-    block_index: Option<u32>,
+    pub block_index: Option<u32>,
     pub transactions: HashSet<transaction::Transaction>,
 }
 static mut BLOCK_POSITION_INDEX: u32 = 0;

@@ -31,6 +31,6 @@ fn simple_pbs() {
         &rand_num_vec,
     );
     assert_ne!(blockchain.len(), 0);
-    save_blockchain_to_csv(&blockchain, "simple_pbs_test.csv")
+    save_continuous_simulation_to_csv(&blockchain, &"simple_pbs_test.csv".to_string())
         .expect("save_blockchain_to_csv() failing from simple_pbs() test");
 }

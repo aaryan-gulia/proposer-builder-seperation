@@ -31,3 +31,31 @@ pub fn save_blockchain_to_csv(
 
     Ok(())
 }
+
+pub fn save_continuous_simulation_to_csv(
+    blockchain: &Vec<block::Block>,
+    file_name: &String,
+) -> Result<(), Box<dyn Error>> {
+    let mut wtr = WriterBuilder::new().from_path(file_name)?;
+
+    wtr.write_record(&[
+        "builder_id",
+        "proposer_id",
+        "gas_captured",
+        "mev_captured",
+        "block_bid",
+        "block_index",
+    ])?;
+
+    for b in blockchain.iter() {
+        wtr.serialize(&[
+            b.builder_id,
+            b.proposer_id.unwrap(),
+            b.gas_captured as u32,
+            b.mev_captured as u32,
+            b.block_inclusion_bid as u32,
+            b.block_index.unwrap(),
+        ])?;
+    }
+    Ok(())
+}
