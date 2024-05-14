@@ -42,3 +42,24 @@ pub fn save_continuous_simulation_to_csv(
     }
     Ok(())
 }
+
+pub fn save_pos_to_csv(
+    blockchain: &Vec<block::Block>,
+    file_name: &String,
+) -> Result<(), Box<dyn Error>> {
+    let mut wtr = WriterBuilder::new().from_path(file_name)?;
+    wtr.write_record(&["builder_id", "builder_type", "gas_captured", "mev_captured"])?;
+
+    for b in blockchain.iter() {
+        wtr.serialize(&[
+            b.builder_id,
+            match b.builder_type.clone().unwrap() {
+                builder::BuilderType::NormalBuilder(_) => 1,
+                builder::BuilderType::MevBuilder(_) => 0,
+            },
+            b.gas_captured as u32,
+            b.mev_captured as u32,
+        ])?;
+    }
+    Ok(())
+}
