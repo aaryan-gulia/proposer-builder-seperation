@@ -9,6 +9,7 @@ pub mod init {
         num_builders: u32,
         builder_characteristic: f64,
     ) -> Vec<builder::BuilderType> {
+        builder::Builder::reset();
         let mut builder_vec: Vec<builder::BuilderType> = vec![];
         for id in 1..=num_builders {
             builder_vec.push(builder::BuilderType::NormalBuilder(

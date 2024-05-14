@@ -4,6 +4,7 @@ use crate::entities::traits;
 use rand::distributions::{Distribution, Uniform};
 use std::collections::HashSet;
 
+#[derive(Debug, Clone)]
 pub struct Proposer {
     pub id: u32,
 }

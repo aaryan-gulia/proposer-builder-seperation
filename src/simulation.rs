@@ -31,7 +31,7 @@ pub fn execute_simulation(
         let block_proposer = uniform.sample(&mut rng);
         let mut proposed_block = proposer_vec[block_proposer].run_auction(
             builder_vec,
-            10,
+            100,
             &blockchain,
             random_number_vec,
         );

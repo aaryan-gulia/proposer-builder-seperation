@@ -9,29 +9,6 @@ use serde::Serialize;
 use std::collections::HashSet;
 use std::{error::Error, io, process};
 
-pub fn save_blockchain_to_csv(
-    blockchain: &Vec<block::Block>,
-    file_name: &str,
-) -> Result<(), Box<dyn Error>> {
-    let mut wtr = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(file_name)?;
-    //    wtr.write_record(&[
-    //        "builder_id",
-    //        "proposer_id",
-    //        "gas_captured",
-    //        "mev_captured",
-    //        "block_bid",
-    //        "index",
-    //    ])?;
-    for b in blockchain.iter() {
-        wtr.serialize(b)?;
-    }
-    wtr.flush()?;
-
-    Ok(())
-}
-
 pub fn save_continuous_simulation_to_csv(
     blockchain: &Vec<block::Block>,
     file_name: &String,
@@ -40,6 +17,7 @@ pub fn save_continuous_simulation_to_csv(
 
     wtr.write_record(&[
         "builder_id",
+        "builder_type",
         "proposer_id",
         "gas_captured",
         "mev_captured",
@@ -50,6 +28,10 @@ pub fn save_continuous_simulation_to_csv(
     for b in blockchain.iter() {
         wtr.serialize(&[
             b.builder_id,
+            match b.builder_type.clone().unwrap() {
+                builder::BuilderType::NormalBuilder(_) => 1,
+                builder::BuilderType::MevBuilder(_) => 0,
+            },
             b.proposer_id.unwrap(),
             b.gas_captured as u32,
             b.mev_captured as u32,

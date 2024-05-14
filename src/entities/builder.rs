@@ -5,21 +5,28 @@ use rand::distributions::{Distribution, Uniform};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serde::de::value::EnumAccessDeserializer;
+use serde::Serialize;
 use std::collections::HashSet;
 
+#[derive(Debug, Clone)]
 pub enum BuilderType {
     NormalBuilder(NormalBuilder),
     MevBuilder(MevBuilder),
 }
 
+#[derive(Debug, Clone)]
 pub struct NormalBuilder {
     pub builder: Builder,
     pub proposer: Option<proposer::Proposer>,
 }
+
+#[derive(Debug, Clone)]
 pub struct MevBuilder {
     pub builder: Builder,
     pub proposer: Option<proposer::Proposer>,
 }
+
+#[derive(Debug, Clone)]
 pub struct Builder {
     pub id: u32,
     pub characteristic: f64,
@@ -36,6 +43,11 @@ impl Builder {
             id: unsafe { BUILDER_ID_COUNTER },
             characteristic,
             mempool: vec![].into_iter().collect(),
+        }
+    }
+    pub fn reset() {
+        unsafe {
+            BUILDER_ID_COUNTER = 0;
         }
     }
     pub fn collect_transaction(&mut self, transaction_vec: &HashSet<transaction::Transaction>) {
@@ -136,6 +148,7 @@ impl NormalBuilder {
             mev_captured as f64,
             bid,
             transactions_in_block,
+            BuilderType::NormalBuilder(self.clone()),
         )
     }
 }
@@ -306,6 +319,7 @@ impl MevBuilder {
             mev_captured as f64,
             bid,
             transactions_in_block,
+            BuilderType::MevBuilder(self.clone()),
         )
     }
 
