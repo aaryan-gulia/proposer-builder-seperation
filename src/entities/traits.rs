@@ -19,26 +19,41 @@ pub trait Proposer {
             .into_iter() // Iterate in parallel using Rayon
             .map(|b| match b {
                 builder::BuilderType::NormalBuilder(normal_builder) => {
-                    normal_builder.build_block(block_size, blockchain, random_numbers)
+                    let mut block = normal_builder.build_block(block_size);
+                    let bid = builder::Builder::parse_bid_calculation(
+                        (block.gas_captured + block.mev_captured) as i64,
+                        blockchain,
+                        random_numbers,
+                    );
+                    block.block_inclusion_bid = Some(bid);
+                    block
                 }
                 builder::BuilderType::MevBuilder(mev_builder) => {
-                    mev_builder.build_block(block_size, blockchain, random_numbers)
+                    let mut block = mev_builder.build_block(block_size);
+                    let bid = builder::Builder::parse_bid_calculation(
+                        (block.gas_captured + block.mev_captured) as i64,
+                        blockchain,
+                        random_numbers,
+                    );
+                    block.block_inclusion_bid = Some(bid);
+                    block
                 }
             })
             .collect();
         let winning_block: &block::Block = submitted_blocks
             .iter()
-            .max_by_key(|b| b.block_inclusion_bid as u32)
+            .max_by_key(|b| b.block_inclusion_bid.unwrap() as u32)
             .unwrap();
 
         let highest_bid = submitted_blocks
             .iter()
-            .max_by_key(|b| b.block_inclusion_bid as u32)
+            .max_by_key(|b| b.block_inclusion_bid.unwrap() as u32)
             .unwrap()
-            .block_inclusion_bid;
+            .block_inclusion_bid
+            .unwrap();
         let highest_bid_blocks = submitted_blocks
             .iter()
-            .filter(|b| b.block_inclusion_bid as u32 == highest_bid as u32)
+            .filter(|b| b.block_inclusion_bid.unwrap() as u32 == highest_bid as u32)
             .collect::<Vec<_>>();
 
         let mut rng = thread_rng();

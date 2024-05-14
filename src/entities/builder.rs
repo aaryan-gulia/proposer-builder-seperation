@@ -86,7 +86,11 @@ impl Builder {
                     > blockchain
                         .get(random_number as usize)
                         .unwrap()
-                        .block_inclusion_bid as u32
+                        .block_inclusion_bid
+                        .expect(
+                            "blocks included in blockchain must have a bid value
+                            if calculate_bid is being called!",
+                        ) as u32
                 {
                     total_utility += block_value - bid as i64;
                 }
@@ -98,15 +102,36 @@ impl Builder {
         }
         optimal_bid as f64
     }
+
+    pub fn parse_bid_calculation(
+        block_value: i64,
+        blockchain: &Vec<block::Block>,
+        random_numbers: &Vec<f64>,
+    ) -> f64 {
+        let mut bid: f64 = 0.0;
+        if blockchain.len() > 10 {
+            bid = Builder::calculate_bid(
+                block_value,
+                &blockchain[blockchain.len() - 10..],
+                10,
+                random_numbers,
+            );
+        } else if blockchain.len() == 0 {
+            bid = ((block_value) / 2) as f64
+        } else {
+            bid = Builder::calculate_bid(
+                block_value,
+                &blockchain[..],
+                blockchain.len() as u32,
+                random_numbers,
+            )
+        }
+        bid
+    }
 }
 
 impl NormalBuilder {
-    pub fn build_block(
-        &self,
-        mut block_size: u32,
-        blockchain: &Vec<block::Block>,
-        random_numbers: &Vec<f64>,
-    ) -> block::Block {
+    pub fn build_block(&self, mut block_size: u32) -> block::Block {
         let mut gas_vec: Vec<transaction::Transaction> = vec![];
         gas_vec.reserve(self.builder.mempool.len());
         for t in self.builder.mempool.iter() {
@@ -124,29 +149,11 @@ impl NormalBuilder {
             gas_captured += gas_vec[i as usize].gas_amount;
             transactions_in_block.insert(gas_vec[i as usize].clone());
         }
-        let mut bid: f64 = 0.0;
-        if blockchain.len() > 10 {
-            bid = Builder::calculate_bid(
-                gas_captured + mev_captured,
-                &blockchain[blockchain.len() - 10..],
-                10,
-                random_numbers,
-            );
-        } else if blockchain.len() == 0 {
-            bid = ((gas_captured + mev_captured) / 2) as f64
-        } else {
-            bid = Builder::calculate_bid(
-                gas_captured + mev_captured,
-                &blockchain[..],
-                blockchain.len() as u32,
-                random_numbers,
-            )
-        }
         block::Block::new(
             self.builder.id,
             gas_captured as f64,
             mev_captured as f64,
-            bid,
+            None,
             transactions_in_block,
             BuilderType::NormalBuilder(self.clone()),
         )
@@ -154,12 +161,7 @@ impl NormalBuilder {
 }
 
 impl MevBuilder {
-    pub fn build_block(
-        &self,
-        mut block_size: u32,
-        blockchain: &Vec<block::Block>,
-        random_numbers: &Vec<f64>,
-    ) -> block::Block {
+    pub fn build_block(&self, mut block_size: u32) -> block::Block {
         let mut gas_vec: Vec<transaction::Transaction> = vec![];
         let mut mev_gas_vec: Vec<transaction::Transaction> = vec![];
         let curr_block_size = std::cmp::min(self.builder.mempool.len(), block_size as usize);
@@ -295,29 +297,11 @@ impl MevBuilder {
             }
         }
 
-        let mut bid: f64 = 0.0;
-        if blockchain.len() > 10 {
-            bid = Builder::calculate_bid(
-                gas_captured + mev_captured,
-                &blockchain[blockchain.len() - 10..],
-                10,
-                random_numbers,
-            );
-        } else if blockchain.len() == 0 {
-            bid = ((gas_captured + mev_captured) / 2) as f64
-        } else {
-            bid = Builder::calculate_bid(
-                gas_captured + mev_captured,
-                &blockchain[..],
-                blockchain.len() as u32,
-                random_numbers,
-            )
-        }
         block::Block::new(
             self.builder.id,
             gas_captured as f64,
             mev_captured as f64,
-            bid,
+            None,
             transactions_in_block,
             BuilderType::MevBuilder(self.clone()),
         )

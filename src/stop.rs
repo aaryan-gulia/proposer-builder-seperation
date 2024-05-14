@@ -35,7 +35,8 @@ pub fn save_continuous_simulation_to_csv(
             b.proposer_id.unwrap(),
             b.gas_captured as u32,
             b.mev_captured as u32,
-            b.block_inclusion_bid as u32,
+            b.block_inclusion_bid
+                .expect("PBS simulation blocks must have a bid value!") as u32,
             b.block_index.unwrap(),
         ])?;
     }

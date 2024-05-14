@@ -10,7 +10,7 @@ pub struct Block {
     pub proposer_id: Option<u32>,
     pub gas_captured: f64,
     pub mev_captured: f64,
-    pub block_inclusion_bid: f64,
+    pub block_inclusion_bid: Option<f64>,
     pub block_index: Option<u32>,
     pub transactions: HashSet<transaction::Transaction>,
     pub builder_type: Option<builder::BuilderType>,
@@ -22,7 +22,7 @@ impl Block {
         builder_id: u32,
         gas_captured: f64,
         mev_captured: f64,
-        block_inclusion_bid: f64,
+        block_inclusion_bid: Option<f64>,
         transaction_set: HashSet<transaction::Transaction>,
         builder_type: builder::BuilderType,
     ) -> Self {
