@@ -31,7 +31,7 @@ fn vary_num_builders() {
             let mut proposer_vec = initiate_proposers(5);
 
             let transaction_set: HashSet<transaction::Transaction> =
-                initiate_transactions_default(NUM_TRANSACTIONS);
+                initiate_transactions_default(NUM_TRANSACTIONS, 0);
 
             let blockchain = execute_simulation(
                 NUM_BLOCKS,

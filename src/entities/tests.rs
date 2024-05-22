@@ -14,6 +14,7 @@ fn builder_mempool_function() {
             .gas_amount(100)
             .max_mev_amount(100)
             .transaction_type(transaction::TransactionType::Normal)
+            .block_created(0)
             .build()
             .unwrap();
         transaction_vec.insert(t);

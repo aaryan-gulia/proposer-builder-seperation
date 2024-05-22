@@ -17,6 +17,7 @@ fn new_correct_transaction() {
         .gas_amount(100)
         .max_mev_amount(100)
         .transaction_type(transaction::TransactionType::Normal)
+        .block_created(0)
         .build()
         .unwrap();
     assert_eq!(t.get_transaction_id().unwrap(), 1);

@@ -161,7 +161,7 @@ impl NormalBuilder {
 }
 
 impl MevBuilder {
-    pub fn build_block(&self, mut block_size: u32) -> block::Block {
+    pub fn build_block(&self, block_size: u32) -> block::Block {
         let mut gas_vec: Vec<transaction::Transaction> = vec![];
         let mut mev_gas_vec: Vec<transaction::Transaction> = vec![];
         let curr_block_size = std::cmp::min(self.builder.mempool.len(), block_size as usize);
@@ -212,6 +212,7 @@ impl MevBuilder {
                                     &mut transactions_in_block,
                                     *curr_mev_tx.unwrap(),
                                 );
+                                assert!(transactions_in_block.len() <= block_size as usize);
                                 mev_ptr += 1;
                             } else {
                                 gas_captured += curr_mev_tx.unwrap().gas_amount;
@@ -226,6 +227,7 @@ impl MevBuilder {
                                 &mut transactions_in_block,
                                 *curr_mev_tx.unwrap(),
                             );
+                            assert!(transactions_in_block.len() <= block_size as usize);
                             mev_ptr += 1;
                         }
                     }
@@ -251,10 +253,11 @@ impl MevBuilder {
                     gas_ptr += 1;
                     continue;
                 }
-                if curr_block_size - 1 <= transactions_in_block.len() {
+                if curr_block_size - 1 == transactions_in_block.len() {
                     gas_captured += curr_gas_tx.unwrap().gas_amount;
                     transactions_in_block.insert(*curr_gas_tx.unwrap());
                     gas_ptr += 1;
+                    assert!(transactions_in_block.len() <= block_size as usize);
                     continue;
                 }
                 let next_gas_tx = gas_vec.get(gas_ptr + 1);
@@ -262,6 +265,7 @@ impl MevBuilder {
                     Some(t) => {
                         if t.gas_amount + curr_gas_tx.unwrap().gas_amount
                             < curr_mev_tx.unwrap().max_mev_amount + curr_mev_tx.unwrap().gas_amount
+                            && curr_block_size - 1 > transactions_in_block.len()
                         {
                             mev_captured += curr_mev_tx.unwrap().max_mev_amount;
                             gas_captured += curr_mev_tx.unwrap().gas_amount;
@@ -270,15 +274,21 @@ impl MevBuilder {
                                 *curr_mev_tx.unwrap(),
                             );
                             mev_ptr += 1;
+                            assert!(transactions_in_block.len() <= block_size as usize);
                         } else {
+                            if transactions_in_block.len() == curr_block_size {
+                                break;
+                            }
                             gas_captured += curr_gas_tx.unwrap().gas_amount;
                             transactions_in_block.insert(*curr_gas_tx.unwrap());
                             gas_ptr += 1;
+                            assert!(transactions_in_block.len() <= block_size as usize);
                         }
                     }
                     None => {
                         if curr_gas_tx.unwrap().gas_amount
                             < curr_mev_tx.unwrap().gas_amount + curr_mev_tx.unwrap().max_mev_amount
+                            && curr_block_size - 1 > transactions_in_block.len()
                         {
                             mev_captured += curr_mev_tx.unwrap().max_mev_amount;
                             gas_captured += curr_mev_tx.unwrap().gas_amount;
@@ -287,16 +297,19 @@ impl MevBuilder {
                                 *curr_mev_tx.unwrap(),
                             );
                             mev_ptr += 1;
+                            assert!(transactions_in_block.len() <= block_size as usize);
                         } else {
                             gas_captured += curr_gas_tx.unwrap().gas_amount;
                             transactions_in_block.insert(*curr_gas_tx.unwrap());
                             gas_ptr += 1;
+                            assert!(transactions_in_block.len() <= block_size as usize);
                         }
                     }
                 }
             }
         }
 
+        assert!(transactions_in_block.len() <= block_size as usize);
         block::Block::new(
             self.builder.id,
             gas_captured as f64,
