@@ -7,6 +7,7 @@ pub struct Transaction {
     pub gas_amount: i64,
     pub max_mev_amount: i64,
     pub transaction_type: TransactionType,
+    pub block_created: u32,
 }
 
 impl Transaction {
@@ -64,11 +65,22 @@ pub enum TransactionType {
     Attacked,
 }
 
+impl ToString for TransactionType {
+    fn to_string(&self) -> String {
+        match self {
+            TransactionType::Normal => "normal".to_string(),
+            TransactionType::Attack => "attack".to_string(),
+            TransactionType::Attacked => "attacked".to_string(),
+        }
+    }
+}
+
 pub struct TransactionBuilder {
     id: Option<u32>,
     gas_amount: Option<i64>,
     max_mev_amount: Option<i64>,
     transaction_type: Option<TransactionType>,
+    block_created: Option<u32>,
 }
 
 impl TransactionBuilder {
@@ -84,6 +96,7 @@ impl TransactionBuilder {
             gas_amount: None,
             max_mev_amount: None,
             transaction_type: None,
+            block_created: None,
         }
     }
 }
@@ -107,6 +120,11 @@ impl TransactionBuilder {
         self
     }
 
+    pub fn block_created(mut self, block_created: u32) -> Self {
+        self.block_created = Some(block_created);
+        self
+    }
+
     pub fn build(self) -> Result<Transaction, TransactionBuilderError> {
         let gas_amount = self
             .gas_amount
@@ -117,7 +135,9 @@ impl TransactionBuilder {
         let transaction_type = self
             .transaction_type
             .ok_or(TransactionBuilderError::MissingTransactionType)?;
-
+        let block_created = self
+            .block_created
+            .ok_or(TransactionBuilderError::MissingBlockCreatedNumber)?;
         let id = match transaction_type {
             TransactionType::Normal => unsafe {
                 NORMAL_TRANSACTION_COUNTER += 1;
@@ -135,6 +155,7 @@ impl TransactionBuilder {
             gas_amount,
             max_mev_amount,
             transaction_type,
+            block_created,
         })
     }
 }
@@ -145,6 +166,7 @@ pub enum TransactionBuilderError {
     MissingMaxMevAmount,
     MissingTransactionType,
     InvalidId,
+    MissingBlockCreatedNumber,
 }
 
 impl std::fmt::Display for TransactionBuilderError {
@@ -162,6 +184,9 @@ impl From<TransactionBuilderError> for String {
                 TransactionBuilderError::MissingMaxMevAmount => "missing max mev amount",
                 TransactionBuilderError::MissingTransactionType => "missing transaction type",
                 TransactionBuilderError::InvalidId => "invalid id",
+                TransactionBuilderError::MissingBlockCreatedNumber => {
+                    "missing block created number"
+                }
             }
         }
     }

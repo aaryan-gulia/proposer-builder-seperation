@@ -8,25 +8,25 @@ use serde::de::value::EnumAccessDeserializer;
 use serde::Serialize;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum BuilderType {
     NormalBuilder(NormalBuilder),
     MevBuilder(MevBuilder),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct NormalBuilder {
     pub builder: Builder,
     pub proposer: Option<proposer::Proposer>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct MevBuilder {
     pub builder: Builder,
     pub proposer: Option<proposer::Proposer>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Builder {
     pub id: u32,
     pub characteristic: f64,
@@ -318,6 +318,7 @@ impl MevBuilder {
             .gas_amount(0)
             .max_mev_amount(0)
             .transaction_type(transaction::TransactionType::Attack)
+            .block_created(0)
             .build();
         transactions.insert(attack_tx.unwrap());
     }

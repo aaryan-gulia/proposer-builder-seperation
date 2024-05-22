@@ -4,7 +4,7 @@ use crate::entities::builder;
 use serde::Serialize;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Block {
     pub builder_id: u32,
     pub proposer_id: Option<u32>,

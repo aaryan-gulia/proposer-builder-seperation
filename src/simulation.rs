@@ -39,7 +39,12 @@ pub fn execute_pos_simulation(
             &mut transaction_set,
             &curr_block.transactions,
         );
-        maintain::refill_transactions_default(num_transactions, &mut transaction_set);
+        curr_block.block_index = Some(block_index);
+        maintain::refill_transactions_default(
+            num_transactions,
+            block_index + 1,
+            &mut transaction_set,
+        );
         blockchain.push(curr_block);
     }
     blockchain
@@ -80,7 +85,12 @@ pub fn execute_simulation(
             &mut transaction_set,
             &proposed_block.transactions,
         );
-        maintain::refill_transactions_default(num_transactions, &mut transaction_set);
+        proposed_block.block_index = Some(block_index);
+        maintain::refill_transactions_default(
+            num_transactions,
+            proposed_block.block_index.unwrap() + 1,
+            &mut transaction_set,
+        );
         //println!("{}", &proposed_block.get_block_index().unwrap());
         blockchain.push(proposed_block);
     }

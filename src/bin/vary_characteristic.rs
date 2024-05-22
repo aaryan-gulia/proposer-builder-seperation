@@ -10,7 +10,7 @@ use std::collections::HashSet;
 use std::thread::available_parallelism;
 
 fn main() {
-    vary_pos_characteristic();
+    vary_characteristic();
 }
 
 fn vary_characteristic() {
@@ -30,7 +30,7 @@ fn vary_characteristic() {
             let mut proposer_vec = initiate_proposers(5);
 
             let transaction_set: HashSet<transaction::Transaction> =
-                initiate_transactions_default(NUM_TRANSACTIONS);
+                initiate_transactions_default(NUM_TRANSACTIONS, 0);
 
             let blockchain = execute_simulation(
                 NUM_BLOCKS,
@@ -40,7 +40,7 @@ fn vary_characteristic() {
                 &rand_num_vec,
             );
             let file_name = format!(
-                "../data/pos_vary_mev_and_characteristic/mev_builders={}characteristic={}.csv",
+                "data/pbs_vary_mev_and_characteristic/mev_builders={}characteristic={}.csv",
                 mev_builders, characteristic
             );
 
@@ -69,7 +69,7 @@ fn vary_pos_characteristic() {
             builder_vec.append(&mut initiate_mev_builder(mev_builders, characteristic));
 
             let transaction_set: HashSet<transaction::Transaction> =
-                initiate_transactions_default(NUM_TRANSACTIONS);
+                initiate_transactions_default(NUM_TRANSACTIONS, 0);
 
             let blockchain = execute_pos_simulation(
                 NUM_BLOCKS,
@@ -77,7 +77,7 @@ fn vary_pos_characteristic() {
                 transaction_set.clone(), // Clone required for parallel execution
             );
             let file_name = format!(
-                "../data/pos_vary_mev_and_characteristic/mev_builders={}characteristic={}.csv",
+                "data/pos_vary_mev_and_characteristic/mev_builders={}characteristic={}.csv",
                 mev_builders, characteristic
             );
 

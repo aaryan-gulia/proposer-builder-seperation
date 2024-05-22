@@ -61,6 +61,7 @@ pub mod init {
 
     pub fn initiate_transactions_default(
         num_transaction: u32,
+        block_created: u32,
     ) -> HashSet<transaction::Transaction> {
         transaction::TransactionBuilder::reset();
         let mut transaction_set: HashSet<transaction::Transaction> = vec![].into_iter().collect();
@@ -72,6 +73,7 @@ pub mod init {
                 .gas_amount(uniform.sample(&mut rng) as i64)
                 .max_mev_amount(uniform.sample(&mut rng) as i64)
                 .transaction_type(transaction::TransactionType::Normal)
+                .block_created(block_created)
                 .build()
                 .expect("initiate_transaction_default() failing. transaction build failing");
             transaction_set.insert(t);
@@ -106,11 +108,13 @@ pub mod maintain {
 
     pub fn refill_transactions_default(
         num_transactions: u32,
+        curr_block_number: u32,
         transactions: &mut HashSet<transaction::Transaction>,
     ) {
         let temp_transactions = transactions.clone();
         let num_new_transactions = num_transactions - transactions.len() as u32;
-        let new_transactions = initiate_transactions_default(num_new_transactions);
+        let new_transactions =
+            initiate_transactions_default(num_new_transactions, curr_block_number);
         let transactions_union: HashSet<&transaction::Transaction> =
             temp_transactions.union(&new_transactions).collect();
 
