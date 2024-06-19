@@ -24,7 +24,7 @@ fn main() {
                     50,
                     *mev_builder,
                     *num_transaction,
-                    1000,
+                    5000,
                     100,
                     *characteristic,
                     format!("tammy_asked_for_these"),

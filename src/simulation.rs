@@ -60,11 +60,11 @@ pub fn execute_simulation(
     mut transaction_set: HashSet<transaction::Transaction>,
     random_number_vec: &Vec<f64>,
 ) -> Vec<block::Block> {
-    println!("Setup Simulation");
     let mut blockchain: Vec<block::Block> = vec![];
     let num_transactions = transaction_set.len() as u32;
+    let mut rng = thread_rng();
+    let uniform = Uniform::new(0, proposer_vec.len() as usize);
     for block_index in 1..=num_blocks {
-        print!("Block {} : ", block_index);
         for b in builder_vec.iter_mut() {
             match b {
                 builder::BuilderType::NormalBuilder(b) => {
@@ -75,13 +75,18 @@ pub fn execute_simulation(
                 }
             }
         }
-        print!("transactions_collected || ");
-        //let block_proposer = uniform.sample(&mut rng);
-        let mut proposed_block =
-            proposer_vec[0].run_auction(builder_vec, 100, &blockchain, random_number_vec);
-        print!("auction complete || ");
-        proposer_vec[0].propose_block(&proposer_vec[0], &mut proposed_block, 100);
-        print!("block proposed || ");
+        let block_proposer = uniform.sample(&mut rng);
+        let mut proposed_block = proposer_vec[block_proposer].run_auction(
+            builder_vec,
+            100,
+            &blockchain,
+            random_number_vec,
+        );
+        proposer_vec[block_proposer].propose_block(
+            &proposer_vec[block_proposer],
+            &mut proposed_block,
+            100,
+        );
         transaction::Transaction::clean_transaction_set(
             &mut transaction_set,
             &proposed_block.transactions,
@@ -92,7 +97,6 @@ pub fn execute_simulation(
             proposed_block.block_index.unwrap() + 1,
             &mut transaction_set,
         );
-        print!("transactions refilled || \n");
         //println!("{}", &proposed_block.get_block_index().unwrap());
         blockchain.push(proposed_block);
     }
@@ -119,7 +123,6 @@ pub fn setup_and_execute_simulation(
     let transaction_set: HashSet<transaction::Transaction> =
         init::initiate_transactions_default(num_transactions, 0);
 
-    println!("Executing Simulation");
     let blockchain = execute_simulation(
         num_blocks,
         &mut builder_vec,
@@ -134,7 +137,7 @@ pub fn setup_and_execute_simulation(
         num_transactions={}
         num_blocks={}
         block_size={}
-        characteristic={}",
+        characteristic={}.csv",
         dir, total_builders, mev_builders, num_transactions, num_blocks, block_size, characteristic
     );
 

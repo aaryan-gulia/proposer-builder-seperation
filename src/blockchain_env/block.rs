@@ -41,8 +41,10 @@ impl Block {
     }
 
     pub fn add_to_chain(&mut self, proposer_id: u32, block_size: u32) {
-        while self.transactions.len() < block_size as usize {
+        let mut len = self.transactions.len();
+        while len < block_size as usize {
             self.transactions.insert(Transaction::default());
+            len += 1;
         }
         unsafe {
             BLOCK_POSITION_INDEX += 1;

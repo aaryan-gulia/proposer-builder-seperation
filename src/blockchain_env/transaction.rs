@@ -12,7 +12,7 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn get_transaction_id(&self) -> Option<u32> {
-        if self.id > 0 {
+        if self.id >= 0 {
             Some(self.id)
         } else {
             None
@@ -61,13 +61,13 @@ impl Transaction {
 
 impl Default for Transaction {
     fn default() -> Self {
-        Transaction {
-            id: 0,
-            gas_amount: 0,
-            max_mev_amount: 0,
-            transaction_type: TransactionType::Empty,
-            block_created: 0,
-        }
+        TransactionBuilder::new()
+            .block_created(0)
+            .gas_amount(0)
+            .max_mev_amount(0)
+            .transaction_type(TransactionType::Empty)
+            .build()
+            .expect("DEFAULT TRANSACTION BUILD FAILING")
     }
 }
 #[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -161,7 +161,14 @@ impl TransactionBuilder {
                 ATTACK_TRANSACTION_COUNTER += 1;
                 ATTACK_TRANSACTION_COUNTER
             },
-            _ => return Err(TransactionBuilderError::MissingTransactionType),
+            TransactionType::Empty => unsafe {
+                NORMAL_TRANSACTION_COUNTER += 1;
+                NORMAL_TRANSACTION_COUNTER
+            },
+            TransactionType::Attacked => unsafe {
+                NORMAL_TRANSACTION_COUNTER += 1;
+                NORMAL_TRANSACTION_COUNTER
+            },
         };
 
         Ok(Transaction {
