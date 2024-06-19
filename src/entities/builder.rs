@@ -62,7 +62,15 @@ impl Builder {
     }
 
     pub fn clean_mempools(&mut self, remove_transactions: &HashSet<transaction::Transaction>) {
-        self.mempool.retain(|t| !remove_transactions.contains(t));
+        let mut temp_vec: Vec<transaction::Transaction> = vec![];
+        for t in self.mempool.iter() {
+            for rt in remove_transactions {
+                if t.get_transaction_id() == rt.get_transaction_id() {
+                    temp_vec.push(*t)
+                }
+            }
+        }
+        self.mempool.retain(|t| !temp_vec.contains(t));
     }
     pub fn calculate_bid(
         block_value: i64,

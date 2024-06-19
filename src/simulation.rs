@@ -132,12 +132,7 @@ pub fn setup_and_execute_simulation(
     );
 
     let file_name = format!(
-        "data/{}/total_builders={}
-        mev_builders={}
-        num_transactions={}
-        num_blocks={}
-        block_size={}
-        characteristic={}.csv",
+        "data/{}/total_builders={}mev_builders={}num_transactions={}num_blocks={}block_size={}characteristic={}.csv",
         dir, total_builders, mev_builders, num_transactions, num_blocks, block_size, characteristic
     );
 
