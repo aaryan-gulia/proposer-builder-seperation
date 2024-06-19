@@ -50,6 +50,7 @@ impl Builder {
             BUILDER_ID_COUNTER = 0;
         }
     }
+
     pub fn collect_transaction(&mut self, transaction_vec: &HashSet<transaction::Transaction>) {
         let mut rng = rand::thread_rng();
         let dist = Uniform::from(0.0..100.0);

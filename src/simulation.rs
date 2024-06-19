@@ -79,8 +79,11 @@ pub fn execute_simulation(
             &blockchain,
             random_number_vec,
         );
-        proposer_vec[block_proposer]
-            .propose_block(&proposer_vec[block_proposer], &mut proposed_block);
+        proposer_vec[block_proposer].propose_block(
+            &proposer_vec[block_proposer],
+            &mut proposed_block,
+            100,
+        );
         transaction::Transaction::clean_transaction_set(
             &mut transaction_set,
             &proposed_block.transactions,

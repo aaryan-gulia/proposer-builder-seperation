@@ -78,7 +78,12 @@ pub trait Proposer {
         });
         (*random_highest_bid_block).clone()
     }
-    fn propose_block(&self, p: &proposer::Proposer, proposed_block: &mut block::Block) {
-        proposed_block.add_to_chain(p.id);
+    fn propose_block(
+        &self,
+        p: &proposer::Proposer,
+        proposed_block: &mut block::Block,
+        block_size: u32,
+    ) {
+        proposed_block.add_to_chain(p.id, block_size);
     }
 }

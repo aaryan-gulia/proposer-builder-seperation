@@ -58,11 +58,24 @@ impl Transaction {
         first.retain(|t| !second.contains(t));
     }
 }
+
+impl Default for Transaction {
+    fn default() -> Self {
+        Transaction {
+            id: 0,
+            gas_amount: 0,
+            max_mev_amount: 0,
+            transaction_type: TransactionType::Empty,
+            block_created: 0,
+        }
+    }
+}
 #[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransactionType {
     Normal,
     Attack,
     Attacked,
+    Empty,
 }
 
 impl ToString for TransactionType {
@@ -71,6 +84,7 @@ impl ToString for TransactionType {
             TransactionType::Normal => "normal".to_string(),
             TransactionType::Attack => "attack".to_string(),
             TransactionType::Attacked => "attacked".to_string(),
+            TransactionType::Empty => "empty".to_string(),
         }
     }
 }
